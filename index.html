@@ -4,7 +4,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>DOOM Web</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#ddd;font:14px system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-canvas{position:fixed;left:0;top:0;background:#111;image-rendering:pixelated;outline:none;display:block}
+canvas{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;object-fit:contain;object-position:center center;background:#000;image-rendering:pixelated;outline:none;display:block}
+@media (orientation:portrait){canvas{object-position:center top}}
+:root{--u:clamp(44px,12vmin,60px)}
 #msg{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#000;text-align:center;padding:20px}
 #fs{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:10;width:40px;height:40px;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:.6}
 #help{position:fixed;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#888;pointer-events:none}
@@ -47,16 +49,7 @@ function map(e){
 // cihaz algılama + ekran boyutu
 var isTouch=(matchMedia('(pointer:coarse)').matches)||('ontouchstart' in window)||(navigator.maxTouchPoints>1);
 document.body.classList.add(isTouch?'touch':'pc');
-function layout(){
-  var W=innerWidth,H=innerHeight,c=document.getElementById('c'),ar=1.6,w,h,x=0,y=0;
-  var portrait=H>W;
-  if(isTouch&&portrait){w=W;h=W/ar;y=0;}           // dikey telefon: üstte, genişliğe sığdır
-  else{ if(W/H>ar){h=H;w=H*ar;}else{w=W;h=W/ar;} x=(W-w)/2;y=(H-h)/2; } // yatay/PC: ekranı doldur
-  c.style.width=w+'px';c.style.height=h+'px';c.style.left=x+'px';c.style.top=y+'px';
-  var u=isTouch?Math.max(44,Math.min(72,Math.min(W,H)*.14)):56;
-  document.documentElement.style.setProperty('--u',u+'px');
-}
-addEventListener('resize',layout);addEventListener('orientationchange',function(){setTimeout(layout,200)});layout();
+// ekran boyutu CSS ile (object-fit:contain), JS gerekmiyor
 function goFull(){
   var d=document,e=d.documentElement;
   if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);return;}
