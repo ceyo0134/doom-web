@@ -1,12 +1,31 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>DOOM Web</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>DOOM Web - by ceyo0134</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#ddd;font:14px system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;object-position:center center;background:#000;image-rendering:pixelated;outline:none;display:block}
 @media (orientation:portrait){canvas{object-position:center top}}
-:root{--u:clamp(44px,12vmin,60px)}
+:root{--s:1;--a:1;--u:calc(clamp(44px,12vmin,60px)*var(--s))}
+#pad{opacity:var(--a)}
+#credit{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;z-index:9;font:600 13px system-ui,sans-serif;color:#fff;opacity:.75;text-shadow:0 1px 3px #000,0 0 6px #000;pointer-events:none;letter-spacing:.5px}
+#gear{display:none;position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(56px + env(safe-area-inset-right,0px));z-index:10;width:40px;height:40px;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font-size:20px;align-items:center;justify-content:center;opacity:.7}
+.touch #gear{display:flex}
+#jw{position:fixed;left:calc(10px + env(safe-area-inset-left,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5;display:none;flex-direction:column;align-items:center;gap:calc(var(--u)*.25)}
+#jw .b{width:calc(var(--u)*1.1);height:calc(var(--u)*.8)}
+#joy{position:relative;width:calc(var(--u)*3.2);height:calc(var(--u)*3.2);border-radius:50%;background:#0006;border:2px solid #fff5;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:calc(var(--u)*1.3);height:calc(var(--u)*1.3);border-radius:50%;background:#fff6;border:2px solid #fff9;transform:translate(-50%,-50%);pointer-events:none}
+.joy #dp{display:none}
+.touch.joy #jw{display:flex}
+#panel{position:fixed;inset:0;z-index:30;background:#000a;display:none;align-items:center;justify-content:center;touch-action:auto}
+#panel.open{display:flex}
+.card{background:#1b1b1b;border:1px solid #555;border-radius:14px;padding:14px 16px;width:min(320px,88vw);max-height:90%;overflow:auto;color:#eee;font:15px system-ui,sans-serif}
+.card h3{margin:0 0 10px;font-size:16px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
+.row span.l{flex:1}
+.pb{min-width:44px;height:40px;border:1px solid #777;border-radius:8px;background:#333;color:#fff;font-size:16px;font-weight:700;padding:0 10px}
+.pb.sel{background:#b22;border-color:#f66}
+.val{min-width:52px;text-align:center}
 #msg{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#000;text-align:center;padding:20px}
 #fs{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:10;width:40px;height:40px;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:.6}
 #help{position:fixed;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#888;pointer-events:none}
@@ -28,11 +47,21 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
    <div class="b" data-k="172">&#9664;</div><div class="b" data-k="13">OK</div><div class="b" data-k="174">&#9654;</div>
    <i></i><div class="b" data-k="175">&#9660;</div><i></i>
   </div>
+  <div id="jw"><div class="b" data-k="13">OK</div><div id="joy"><div id="knob"></div></div></div>
   <div class="g" id="ac">
    <div class="b" data-k="27">ESC</div><div class="b" data-k="49">1</div><div class="b" data-k="50">2</div>
    <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
   </div>
 </div>
+<div id="credit">Made by ceyo0134</div>
+<div id="gear" title="Kontrol ayarları">&#9881;</div>
+<div id="panel"><div class="card">
+ <h3>Kontrol ayarları</h3>
+ <div class="row"><span class="l">Yön tuşu</span><button class="pb" data-st="dpad">D-Pad</button><button class="pb" data-st="joy">Joystick</button></div>
+ <div class="row"><span class="l">Boyut</span><button class="pb" data-sz="-1">&minus;</button><span class="val" id="szv">100%</span><button class="pb" data-sz="1">+</button></div>
+ <div class="row"><span class="l">Saydamlık</span><button class="pb" data-al="-1">&minus;</button><span class="val" id="alv">100%</span><button class="pb" data-al="1">+</button></div>
+ <div class="row"><button class="pb" id="rst">Sıfırla</button><button class="pb" id="cls">Kapat</button></div>
+</div></div>
 <div id="msg">DOOM yükleniyor… (~4 MB)</div>
 <script>
 var KEYS={ArrowLeft:172,ArrowRight:174,ArrowUp:173,ArrowDown:175,Enter:13,Escape:27,Tab:9,Backspace:127,
@@ -71,6 +100,38 @@ document.querySelectorAll('.b').forEach(function(b){
   var up=function(e){b.classList.remove('on');send(0,k);};
   b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
 });
+
+// ayarlar (boyut / saydamlık / D-Pad-Joystick), tarayıcıda saklanır
+var S={style:'dpad',size:1,alpha:1};
+try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));}}catch(e){}
+function saveS(){try{localStorage.setItem('doomset',JSON.stringify(S))}catch(e){}}
+function applyS(){
+  var r=document.documentElement.style;r.setProperty('--s',S.size);r.setProperty('--a',S.alpha);
+  document.body.classList.toggle('joy',S.style==='joy');document.body.classList.toggle('dpad',S.style!=='joy');
+  document.getElementById('szv').textContent=Math.round(S.size*100)+'%';
+  document.getElementById('alv').textContent=Math.round(S.alpha*100)+'%';
+  document.querySelectorAll('[data-st]').forEach(function(b){b.classList.toggle('sel',b.dataset.st===S.style)});
+}
+document.getElementById('gear').addEventListener('click',function(){document.getElementById('panel').classList.add('open')});
+document.getElementById('cls').addEventListener('click',function(){document.getElementById('panel').classList.remove('open')});
+document.getElementById('rst').addEventListener('click',function(){S={style:'dpad',size:1,alpha:1};saveS();applyS();});
+document.querySelectorAll('[data-st]').forEach(function(b){b.addEventListener('click',function(){S.style=b.dataset.st;saveS();applyS();})});
+document.querySelectorAll('[data-sz]').forEach(function(b){b.addEventListener('click',function(){S.size=Math.min(2,Math.max(.5,Math.round((S.size+.1*b.dataset.sz)*10)/10));saveS();applyS();})});
+document.querySelectorAll('[data-al]').forEach(function(b){b.addEventListener('click',function(){S.alpha=Math.min(1,Math.max(.2,Math.round((S.alpha+.1*b.dataset.al)*10)/10));saveS();applyS();})});
+applyS();
+// joystick: yukarı/aşağı/sol/sağ (çapraz da olur)
+var joy=document.getElementById('joy'),knob=document.getElementById('knob'),jst={173:0,175:0,172:0,174:0},jid=null;
+function jset(k,on){var v=on?1:0;if(jst[k]!==v){jst[k]=v;send(v,k);}}
+function jmove(e){
+  var r=joy.getBoundingClientRect(),R=r.width/2,dx=e.clientX-(r.left+R),dy=e.clientY-(r.top+R),d=Math.hypot(dx,dy),m=Math.min(d,R*.7);
+  var kx=d?dx/d*m:0,ky=d?dy/d*m:0,dz=R*.28;
+  knob.style.transform='translate(calc(-50% + '+kx+'px),calc(-50% + '+ky+'px))';
+  jset(173,dy<-dz);jset(175,dy>dz);jset(172,dx<-dz);jset(174,dx>dz);
+}
+function jend(){jid=null;knob.style.transform='translate(-50%,-50%)';jset(173,0);jset(175,0);jset(172,0);jset(174,0);}
+joy.addEventListener('pointerdown',function(e){e.preventDefault();jid=e.pointerId;joy.setPointerCapture(e.pointerId);jmove(e);});
+joy.addEventListener('pointermove',function(e){if(e.pointerId===jid)jmove(e);});
+joy.addEventListener('pointerup',jend);joy.addEventListener('pointercancel',jend);
 window.Module={
   canvas:document.getElementById('c'),
   print:function(t){console.log(t)},
@@ -79,5 +140,5 @@ window.Module={
   postRun:[function(){var m=document.getElementById('msg');if(m)m.remove();document.getElementById('c').focus();}]
 };
 </script>
-<script src="doom_web.js?v=3"></script>
+<script src="doom_web.js?v=4"></script>
 </body></html>
