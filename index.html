@@ -1,37 +1,35 @@
 <!doctype html>
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<title>DOOM Web</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>DOOM Web</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#ddd;font:14px system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
-#wrap{display:flex;flex-direction:column;height:100%}
-#screen{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
-canvas{max-width:100%;max-height:100%;aspect-ratio:8/5;background:#111;image-rendering:pixelated;outline:none}
-#msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000d;text-align:center;padding:20px}
-#pad{display:none;justify-content:space-between;align-items:flex-end;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));gap:8px}
-@media (pointer:coarse){#pad{display:flex}}
-.g{display:grid;gap:6px}
-#dp{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px)}
-#ac{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px)}
-.b{border:1px solid #888;border-radius:10px;background:#2228;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
-.b.on{background:#c33}
-#help{padding:4px 10px;font-size:12px;color:#999;text-align:center}
-@media (pointer:coarse){#help{display:none}}
+html,body{margin:0;height:100%;background:#000;color:#ddd;font:14px system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+canvas{position:fixed;left:0;top:0;background:#111;image-rendering:pixelated;outline:none;display:block}
+#msg{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#000;text-align:center;padding:20px}
+#fs{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(8px + env(safe-area-inset-right,0px));z-index:10;width:40px;height:40px;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:.6}
+#help{position:fixed;left:0;right:0;bottom:6px;text-align:center;font-size:12px;color:#888;pointer-events:none}
+.touch #help{display:none}
+#pad{display:none}
+.touch #pad{display:block}
+.g{position:fixed;display:grid;gap:calc(var(--u)*.1);bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
+#dp{left:calc(10px + env(safe-area-inset-left,0px));grid-template-columns:repeat(3,var(--u));grid-template-rows:repeat(3,var(--u))}
+#ac{right:calc(10px + env(safe-area-inset-right,0px));grid-template-columns:repeat(3,var(--u));grid-template-rows:repeat(2,var(--u))}
+.b{border:1px solid #fff6;border-radius:12px;background:#0007;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:calc(var(--u)*.26)}
+.b.on{background:#c33b}
 </style></head><body>
-<div id="wrap">
- <div id="screen"><canvas id="c" width="640" height="400" tabindex="0"></canvas></div>
- <div id="help">Yön: oklar/WASD · Ateş: Ctrl/F · Kullan: Boşluk/E · Koş: Shift · Silah: 1-7 · Menü: Esc · Seç: Enter</div>
- <div id="pad">
+<canvas id="c" width="640" height="400" tabindex="0"></canvas>
+<div id="fs" title="Tam ekran">&#x26F6;</div>
+<div id="help">Yön: oklar/WASD · Ateş: Ctrl/F · Kullan: Boşluk/E · Koş: Shift · Silah: 1-7 · Menü: Esc · Seç: Enter · Tam ekran: sağ üst buton</div>
+<div id="pad">
   <div class="g" id="dp">
-   <i></i><div class="b" data-k="173">▲</div><i></i>
-   <div class="b" data-k="172">◀</div><div class="b" data-k="13">OK</div><div class="b" data-k="174">▶</div>
-   <i></i><div class="b" data-k="175">▼</div><i></i>
+   <i></i><div class="b" data-k="173">&#9650;</div><i></i>
+   <div class="b" data-k="172">&#9664;</div><div class="b" data-k="13">OK</div><div class="b" data-k="174">&#9654;</div>
+   <i></i><div class="b" data-k="175">&#9660;</div><i></i>
   </div>
   <div class="g" id="ac">
    <div class="b" data-k="27">ESC</div><div class="b" data-k="49">1</div><div class="b" data-k="50">2</div>
    <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
   </div>
- </div>
 </div>
 <div id="msg">DOOM yükleniyor… (~4 MB)</div>
 <script>
@@ -45,6 +43,30 @@ function map(e){
   if(e.key&&e.key.length==1)return e.key.toLowerCase().charCodeAt(0);
   return null;
 }
+
+// cihaz algılama + ekran boyutu
+var isTouch=(matchMedia('(pointer:coarse)').matches)||('ontouchstart' in window)||(navigator.maxTouchPoints>1);
+document.body.classList.add(isTouch?'touch':'pc');
+function layout(){
+  var W=innerWidth,H=innerHeight,c=document.getElementById('c'),ar=1.6,w,h,x=0,y=0;
+  var portrait=H>W;
+  if(isTouch&&portrait){w=W;h=W/ar;y=0;}           // dikey telefon: üstte, genişliğe sığdır
+  else{ if(W/H>ar){h=H;w=H*ar;}else{w=W;h=W/ar;} x=(W-w)/2;y=(H-h)/2; } // yatay/PC: ekranı doldur
+  c.style.width=w+'px';c.style.height=h+'px';c.style.left=x+'px';c.style.top=y+'px';
+  var u=isTouch?Math.max(44,Math.min(72,Math.min(W,H)*.14)):56;
+  document.documentElement.style.setProperty('--u',u+'px');
+}
+addEventListener('resize',layout);addEventListener('orientationchange',function(){setTimeout(layout,200)});layout();
+function goFull(){
+  var d=document,e=d.documentElement;
+  if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);return;}
+  var f=e.requestFullscreen||e.webkitRequestFullscreen;
+  if(f){var p=f.call(e);var lock=function(){try{screen.orientation.lock('landscape').catch(function(){})}catch(_){}};
+    if(p&&p.then)p.then(lock).catch(function(){});else lock();}
+}
+document.getElementById('fs').addEventListener('click',goFull);
+document.getElementById('c').addEventListener('dblclick',goFull);
+addEventListener('contextmenu',function(e){e.preventDefault()});
 var held={};
 function send(p,k){if(window.Module&&Module._dg_key)Module._dg_key(p?1:0,k);}
 addEventListener('keydown',function(e){var k=map(e);if(k==null)return;e.preventDefault();if(held[e.code])return;held[e.code]=k;send(1,k);});
