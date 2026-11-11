@@ -37,6 +37,13 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
 #ac{right:calc(10px + env(safe-area-inset-right,0px));grid-template-columns:repeat(3,var(--u));grid-template-rows:repeat(2,var(--u))}
 .b{border:1px solid #fff6;border-radius:12px;background:#0007;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:calc(var(--u)*.26)}
 .b.on{background:#c33b}
+#modb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));z-index:10;height:40px;padding:0 12px;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font:600 14px system-ui,sans-serif;display:flex;align-items:center;gap:6px;opacity:.75}
+#modp{position:fixed;inset:0;z-index:31;background:#000b;display:none;align-items:center;justify-content:center;touch-action:auto}
+#modp.open{display:flex}
+.card small{display:block;color:#aaa;font-size:12px;line-height:1.4;margin:6px 0}
+#modst{min-height:18px;font-size:13px;margin:8px 0}#modst.err{color:#f77}#modst.ok{color:#7d7}
+.fl{display:block;width:100%;box-sizing:border-box;margin:8px 0;padding:12px;border:1px dashed #888;border-radius:8px;text-align:center;background:#262626}
+.fl input{display:none}
 </style></head><body>
 <canvas id="c" width="640" height="400" tabindex="0"></canvas>
 <div id="fs" title="Tam ekran">&#x26F6;</div>
@@ -53,7 +60,7 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
    <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
   </div>
 </div>
-<div id="credit">Made by ceyo0134 · v6</div>
+<div id="credit">Made by ceyo0134 · v7</div>
 <div id="gear" title="Kontrol ayarları">&#9881;</div>
 <div id="panel"><div class="card">
  <h3>Kontrol ayarları</h3>
@@ -63,6 +70,15 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
  <div class="row"><span class="l">Boyut</span><button class="pb" data-sz="-1">&minus;</button><span class="val" id="szv">100%</span><button class="pb" data-sz="1">+</button></div>
  <div class="row"><span class="l">Saydamlık</span><button class="pb" data-al="-1">&minus;</button><span class="val" id="alv">100%</span><button class="pb" data-al="1">+</button></div>
  <div class="row"><button class="pb" id="rst">Sıfırla</button><button class="pb" id="cls">Kapat</button></div>
+</div></div>
+<div id="modb">&#x1F5FA; Mod ekle</div>
+<div id="modp"><div class="card">
+ <h3>Harita modu ekle</h3>
+ <small>Tek harita (.wad / PWAD). Doom 1 formatında (E1M1&ndash;E1M9) ve sadece harita olmalı (özel doku/ses/sprite desteklenmez). Eklenince oyun o haritadan başlar; eklediğin harita, oyundaki aynı numaralı haritanın yerine geçer.</small>
+ <label class="fl"><input type="file" id="modf" accept=".wad,.pwad,application/octet-stream">&#x1F4C2; Dosya seç (.wad)</label>
+ <div id="modcur"></div>
+ <div id="modst"></div>
+ <div class="row"><button class="pb" id="modrm">Modu kaldır</button><button class="pb" id="modx">Kapat</button></div>
 </div></div>
 <div id="msg">DOOM yükleniyor… (~4 MB)</div>
 <script>
@@ -173,6 +189,71 @@ window.Module={
   setStatus:function(s){var m=document.getElementById('msg');if(!m)return;if(s)m.textContent='DOOM yükleniyor… '+s;else{m.remove();document.getElementById('c').focus();}},
   postRun:[function(){var m=document.getElementById('msg');if(m)m.remove();document.getElementById('c').focus();}]
 };
+
+// ---- MOD (harita) ekleme: IndexedDB'de saklanır, sayfa yenilenip -file ile yüklenir ----
+var MOD=null,modSt=document.getElementById('modst');
+function idb(cb){try{var r=indexedDB.open('doommods',1);r.onupgradeneeded=function(){r.result.createObjectStore('m')};r.onsuccess=function(){cb(null,r.result)};r.onerror=function(){cb(r.error)};}catch(e){cb(e)}}
+function idbGet(cb){idb(function(e,db){if(e)return cb(null);var q=db.transaction('m').objectStore('m').get('mod');q.onsuccess=function(){cb(q.result||null)};q.onerror=function(){cb(null)};});}
+function idbSet(v,cb){idb(function(e,db){if(e)return cb(e);var t=db.transaction('m','readwrite'),st=t.objectStore('m');if(v)st.put(v,'mod');else st.delete('mod');t.oncomplete=function(){cb(null)};t.onerror=function(){cb(t.error||new Error('hata'))};});}
+var MAPL=['THINGS','LINEDEFS','SIDEDEFS','VERTEXES','SEGS','SSECTORS','NODES','SECTORS','REJECT','BLOCKMAP'];
+function parseWad(buf){
+  var dv=new DataView(buf);if(buf.byteLength<12)throw new Error('Geçersiz dosya');
+  var id=String.fromCharCode(dv.getUint8(0),dv.getUint8(1),dv.getUint8(2),dv.getUint8(3));
+  if(id!=='PWAD'&&id!=='IWAD')throw new Error('Bu bir WAD dosyası değil');
+  if(id==='IWAD')throw new Error('Bu tam bir oyun WAD\'ı (IWAD), harita modu (PWAD) değil');
+  var n=dv.getInt32(4,true),o=dv.getInt32(8,true);
+  if(n<0||o<12||o+n*16>buf.byteLength)throw new Error('WAD bozuk');
+  var L=[];for(var i=0;i<n;i++){var p=o+i*16,nm='';for(var j=0;j<8;j++){var c=dv.getUint8(p+8+j);if(!c)break;nm+=String.fromCharCode(c)}L.push({name:nm.toUpperCase(),pos:dv.getInt32(p,true),size:dv.getInt32(p+4,true)});}
+  var maps=[];L.forEach(function(x,i){var m=/^E(\d)M(\d)$/.exec(x.name);if(m)maps.push({ep:+m[1],map:+m[2],i:i});});
+  if(!maps.length){if(L.some(function(x){return /^MAP\d\d$/.test(x.name)}))throw new Error('Bu harita Doom 2 formatında (MAPxx). Bu sitedeki Doom 1 ile çalışmaz');throw new Error('WAD içinde harita bulunamadı (E1M1 gibi)');}
+  maps.sort(function(a,b){return a.ep*10+a.map-b.ep*10-b.map});
+  var mp=maps[0];if(mp.ep!==1)throw new Error('Bu site Doom 1 demosu (sadece 1. bölüm). Harita E'+mp.ep+'M'+mp.map+' için, E1Mx olmalı');
+  var lumps=[];for(var k=0;k<10;k++){var e=L[mp.i+1+k];
+    if(!e||e.name!==MAPL[k])throw new Error('Harita lump\'ları eksik/bozuk ('+MAPL[k]+' yok)');
+    if(e.pos<0||e.size<0||e.pos+e.size>buf.byteLength)throw new Error('WAD bozuk ('+e.name+')');
+    lumps.push({pos:e.pos,size:e.size});}
+  return {warp:[mp.ep,mp.map],lumps:lumps};
+}
+// Shareware Doom "-file" yasaklıyor; bu yüzden harita lump'larını oyunun kendi WAD'ına yerleştiriyoruz
+function buildIwad(mod){
+  var info=parseWad(mod.data);
+  return fetch('doom_web5.data').then(function(r){if(!r.ok)throw new Error('oyun verisi indirilemedi');return r.arrayBuffer();}).then(function(ab){
+    var src=new Uint8Array(ab),dv0=new DataView(ab),n=dv0.getInt32(4,true),o=dv0.getInt32(8,true),want='E'+info.warp[0]+'M'+info.warp[1],idx=-1;
+    for(var i=0;i<n&&idx<0;i++){var p=o+i*16,nm='';for(var j=0;j<8;j++){var c=src[p+8+j];if(!c)break;nm+=String.fromCharCode(c)}if(nm===want)idx=i;}
+    if(idx<0)throw new Error(want+' oyunda yok');
+    var extra=0;info.lumps.forEach(function(l){extra+=l.size});
+    var out=new Uint8Array(src.length+extra);out.set(src);var dv=new DataView(out.buffer),cur=src.length,md=new Uint8Array(mod.data);
+    info.lumps.forEach(function(l,k){out.set(md.subarray(l.pos,l.pos+l.size),cur);var ep=o+(idx+1+k)*16;dv.setInt32(ep,cur,true);dv.setInt32(ep+4,l.size,true);cur+=l.size;});
+    return out;});
+}
+function setSt(t,c){modSt.textContent=t;modSt.className=c||'';}
+function showCur(){document.getElementById('modcur').textContent=MOD?('Aktif mod: '+MOD.name+' (E'+MOD.warp[0]+'M'+MOD.warp[1]+')'):'Aktif mod yok';document.getElementById('modrm').style.display=MOD?'':'none';document.getElementById('modb').innerHTML='&#x1F5FA; '+(MOD?'Mod: '+MOD.name.slice(0,14):'Mod ekle');}
+document.getElementById('modb').addEventListener('click',function(){setSt('');showCur();document.getElementById('modp').classList.add('open')});
+document.getElementById('modx').addEventListener('click',function(){document.getElementById('modp').classList.remove('open')});
+document.getElementById('modrm').addEventListener('click',function(){idbSet(null,function(){location.href=location.pathname+'?nomod=1&t='+Date.now();});});
+document.getElementById('modf').addEventListener('change',function(){
+  var f=this.files&&this.files[0];if(!f)return;
+  if(f.size>60*1024*1024){setSt('Dosya çok büyük (en fazla 60 MB)','err');return;}
+  setSt('Okunuyor…');
+  var r=new FileReader();r.onerror=function(){setSt('Dosya okunamadı','err')};
+  r.onload=function(){var warp;try{warp=parseWad(r.result).warp}catch(e){setSt(e.message,'err');return;}
+    idbSet({name:f.name.replace(/\.[^.]+$/,''),data:r.result,warp:warp},function(err){
+      if(err){setSt('Tarayıcı depolaması kapalı (gizli sekme?). Normal sekmede dene','err');return;}
+      setSt('Eklendi! Yeniden başlatılıyor…','ok');setTimeout(function(){location.href=location.pathname+'?t='+Date.now();},500);});};
+  r.readAsArrayBuffer(f);
+});
+function modFail(force,why){if(!MOD||window._mf)return;window._mf=1;var m=document.createElement('div');m.id='msg';m.innerHTML='Mod yüklenirken oyun durdu'+(why?' ('+String(why).replace(/[<>&]/g,'')+')':'')+'.<br><br><button class="pb" id="mf">Modu kaldır ve yenile</button>';document.body.appendChild(m);document.getElementById('mf').onclick=function(){idbSet(null,function(){location.href=location.pathname+'?nomod=1&t='+Date.now();});};}
+Module.onAbort=modFail;Module.onExit=function(c){if(c)modFail();};
+function loadEngine(){var sc=document.createElement('script');sc.src='doom_web5.js?v=7';document.body.appendChild(sc);}
+function startDoom(){
+  if(!MOD){loadEngine();return;}
+  buildIwad(MOD).then(function(iw){
+    Module.arguments=['-iwad','/mod/doom1.wad','-warp',String(MOD.warp[0]),String(MOD.warp[1]),'-skill','3'];
+    Module.preRun=(Module.preRun||[]).concat([function(){Module.FS_createPath('/','mod',true,true);Module.FS_createDataFile('/mod','doom1.wad',iw,true,true,true);}]);
+    loadEngine();
+  }).catch(function(e){console.warn(e);modFail(true,e&&e.message);});
+}
+if(/[?&]nomod=1/.test(location.search)){showCur();startDoom();}
+else idbGet(function(m){MOD=m;showCur();startDoom();});
 </script>
-<script src="doom_web5.js?v=6"></script>
 </body></html>
