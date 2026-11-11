@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>DOOM Web</title>
+<style>
+html,body{margin:0;height:100%;background:#000;color:#ddd;font:14px system-ui,sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+#wrap{display:flex;flex-direction:column;height:100%}
+#screen{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+canvas{max-width:100%;max-height:100%;aspect-ratio:8/5;background:#111;image-rendering:pixelated;outline:none}
+#msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000d;text-align:center;padding:20px}
+#pad{display:none;justify-content:space-between;align-items:flex-end;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));gap:8px}
+@media (pointer:coarse){#pad{display:flex}}
+.g{display:grid;gap:6px}
+#dp{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px)}
+#ac{grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px)}
+.b{border:1px solid #888;border-radius:10px;background:#2228;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.b.on{background:#c33}
+#help{padding:4px 10px;font-size:12px;color:#999;text-align:center}
+@media (pointer:coarse){#help{display:none}}
+</style></head><body>
+<div id="wrap">
+ <div id="screen"><canvas id="c" width="640" height="400" tabindex="0"></canvas></div>
+ <div id="help">Yön: oklar/WASD · Ateş: Ctrl/F · Kullan: Boşluk/E · Koş: Shift · Silah: 1-7 · Menü: Esc · Seç: Enter</div>
+ <div id="pad">
+  <div class="g" id="dp">
+   <i></i><div class="b" data-k="173">▲</div><i></i>
+   <div class="b" data-k="172">◀</div><div class="b" data-k="13">OK</div><div class="b" data-k="174">▶</div>
+   <i></i><div class="b" data-k="175">▼</div><i></i>
+  </div>
+  <div class="g" id="ac">
+   <div class="b" data-k="27">ESC</div><div class="b" data-k="49">1</div><div class="b" data-k="50">2</div>
+   <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
+  </div>
+ </div>
+</div>
+<div id="msg">DOOM yükleniyor… (~4 MB)</div>
+<script>
+var KEYS={ArrowLeft:172,ArrowRight:174,ArrowUp:173,ArrowDown:175,Enter:13,Escape:27,Tab:9,Backspace:127,
+ ControlLeft:163,ControlRight:163,KeyF:163,Space:162,KeyE:162,ShiftLeft:182,ShiftRight:182,AltLeft:184,AltRight:184,
+ KeyW:173,KeyS:175,KeyA:172,KeyD:174,KeyQ:160,Comma:160,Period:161,Minus:45,Equal:61};
+function map(e){
+  if(KEYS[e.code]!=null)return KEYS[e.code];
+  if(/^Digit[0-9]$/.test(e.code))return e.code.charCodeAt(5);
+  if(/^F([1-9]|1[0-2])$/.test(e.code)){var n=+e.code.slice(1);return n<=10?128+58+n:(n==11?128+87:128+88);}
+  if(e.key&&e.key.length==1)return e.key.toLowerCase().charCodeAt(0);
+  return null;
+}
+var held={};
+function send(p,k){if(window.Module&&Module._dg_key)Module._dg_key(p?1:0,k);}
+addEventListener('keydown',function(e){var k=map(e);if(k==null)return;e.preventDefault();if(held[e.code])return;held[e.code]=k;send(1,k);});
+addEventListener('keyup',function(e){var k=held[e.code];if(k==null)return;e.preventDefault();delete held[e.code];send(0,k);});
+addEventListener('blur',function(){for(var c in held){send(0,held[c]);}held={};});
+document.querySelectorAll('.b').forEach(function(b){
+  var k=+b.dataset.k;
+  b.addEventListener('pointerdown',function(e){e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('on');send(1,k);});
+  var up=function(e){b.classList.remove('on');send(0,k);};
+  b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
+});
+window.Module={
+  canvas:document.getElementById('c'),
+  print:function(t){console.log(t)},
+  printErr:function(t){console.warn(t)},
+  setStatus:function(s){var m=document.getElementById('msg');if(!m)return;if(s)m.textContent='DOOM yükleniyor… '+s;else{m.remove();document.getElementById('c').focus();}},
+  postRun:[function(){var m=document.getElementById('msg');if(m)m.remove();document.getElementById('c').focus();}]
+};
+</script>
+<script src="doom_web.js"></script>
+</body></html>
