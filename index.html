@@ -53,7 +53,7 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
    <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
   </div>
 </div>
-<div id="credit">Made by ceyo0134</div>
+<div id="credit">Made by ceyo0134 · v6</div>
 <div id="gear" title="Kontrol ayarları">&#9881;</div>
 <div id="panel"><div class="card">
  <h3>Kontrol ayarları</h3>
@@ -145,7 +145,9 @@ cv.addEventListener('pointerdown',function(e){
   if(e.pointerType==='touch'||e.pointerType==='pen'){
     if(lookId!==null)return;e.preventDefault();lookId=e.pointerId;lx=e.clientX;try{cv.setPointerCapture(e.pointerId)}catch(_){}
   }else{
-    if(document.pointerLockElement!==cv){try{cv.requestPointerLock()}catch(_){}return;}
+    if(document.pointerLockElement!==cv){try{cv.requestPointerLock()}catch(_){}
+      e.preventDefault();lookId='m';lx=e.clientX;try{cv.setPointerCapture(e.pointerId)}catch(_){}
+      if(e.button===0){mb|=1;mouse(0);}return;}
     e.preventDefault();
     if(e.button===0){mb|=1;mouse(0);}else if(e.button===2){send(1,162);}
   }
@@ -154,10 +156,11 @@ cv.addEventListener('pointermove',function(e){
   if(e.pointerType==='touch'||e.pointerType==='pen'){
     if(e.pointerId!==lookId)return;var dx=e.clientX-lx;lx=e.clientX;mouse(dx*5*S.sens);
   }else if(document.pointerLockElement===cv){mouse(e.movementX*3*S.sens);}
+  else if(lookId==='m'){var d=e.clientX-lx;lx=e.clientX;mouse(d*3*S.sens);}
 });
 function lend(e){
   if(e.pointerType==='touch'||e.pointerType==='pen'){if(e.pointerId===lookId)lookId=null;}
-  else{if(e.button===0){mb&=~1;mouse(0);}else if(e.button===2){send(0,162);}}
+  else{if(lookId==='m')lookId=null;if(e.button===0){mb&=~1;mouse(0);}else if(e.button===2){send(0,162);}}
 }
 cv.addEventListener('pointerup',lend);cv.addEventListener('pointercancel',lend);
 document.addEventListener('pointerlockchange',function(){
@@ -171,5 +174,5 @@ window.Module={
   postRun:[function(){var m=document.getElementById('msg');if(m)m.remove();document.getElementById('c').focus();}]
 };
 </script>
-<script src="doom_web5.js?v=5"></script>
+<script src="doom_web5.js?v=6"></script>
 </body></html>
