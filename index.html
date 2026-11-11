@@ -17,8 +17,8 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
 #knob{position:absolute;left:50%;top:50%;width:calc(var(--u)*1.3);height:calc(var(--u)*1.3);border-radius:50%;background:#fff6;border:2px solid #fff9;transform:translate(-50%,-50%);pointer-events:none}
 .joy #dp{display:none}
 .touch.joy #jw{display:flex}
-#panel{position:fixed;inset:0;z-index:30;background:#000a;display:none;align-items:center;justify-content:center;touch-action:auto}
-#panel.open{display:flex}
+#panel,#gpp{position:fixed;inset:0;z-index:30;background:#000a;display:none;align-items:center;justify-content:center;touch-action:auto}
+#panel.open,#gpp.open{display:flex}
 .card{background:#1b1b1b;border:1px solid #555;border-radius:14px;padding:14px 16px;width:min(320px,88vw);max-height:90%;overflow:auto;color:#eee;font:15px system-ui,sans-serif}
 .card h3{margin:0 0 10px;font-size:16px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
@@ -44,10 +44,19 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
 #modst{min-height:18px;font-size:13px;margin:8px 0}#modst.err{color:#f77}#modst.ok{color:#7d7}
 .fl{display:block;width:100%;box-sizing:border-box;margin:8px 0;padding:12px;border:1px dashed #888;border-radius:8px;text-align:center;background:#262626}
 .fl input{display:none}
+#gpb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(104px + env(safe-area-inset-right,0px));z-index:10;width:40px;height:40px;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;opacity:.7}
+.pc #gpb{right:calc(56px + env(safe-area-inset-right,0px))}
+body.gpon #gpb{border-color:#6d6;opacity:1}
+.touch.gpon.gphide #pad{display:none}
+.pc #gphrow{display:none}
+#gpmap table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+#gpmap td{padding:4px;border-bottom:1px solid #333;vertical-align:top}
+#gpmap td:first-child{font-weight:700;white-space:nowrap;padding-right:10px}
+#gpst.ok{color:#7d7}
 </style></head><body>
 <canvas id="c" width="640" height="400" tabindex="0"></canvas>
 <div id="fs" title="Tam ekran">&#x26F6;</div>
-<div id="help">Fare: bakış (oyuna tıkla) · Sol tık: ateş · Sağ tık: kullan · WASD: hareket · Oklar: dönüş · Ctrl/F: ateş · Boşluk/E: kullan · Shift: koş · 1-7: silah · Esc: menü</div>
+<div id="help">Fare: bakış (oyuna tıkla) · Sol tık: ateş · Sağ tık: kullan · WASD: hareket · Oklar: dönüş · Ctrl/F: ateş · Boşluk/E: kullan · Shift: koş · 1-7: silah · Esc: menü · Kol: sol çubuk hareket, sağ çubuk bakış, RT ateş, A kullan</div>
 <div id="pad">
   <div class="g" id="dp">
    <i></i><div class="b" data-k="173">&#9650;</div><i></i>
@@ -60,7 +69,7 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
    <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
   </div>
 </div>
-<div id="credit">Made by ceyo0134 · v7</div>
+<div id="credit">Made by ceyo0134 · v8</div>
 <div id="gear" title="Kontrol ayarları">&#9881;</div>
 <div id="panel"><div class="card">
  <h3>Kontrol ayarları</h3>
@@ -70,6 +79,17 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
  <div class="row"><span class="l">Boyut</span><button class="pb" data-sz="-1">&minus;</button><span class="val" id="szv">100%</span><button class="pb" data-sz="1">+</button></div>
  <div class="row"><span class="l">Saydamlık</span><button class="pb" data-al="-1">&minus;</button><span class="val" id="alv">100%</span><button class="pb" data-al="1">+</button></div>
  <div class="row"><button class="pb" id="rst">Sıfırla</button><button class="pb" id="cls">Kapat</button></div>
+</div></div>
+<div id="gpb" title="Gamepad / Kol">&#x1F3AE;</div>
+<div id="gpp"><div class="card">
+ <h3>Gamepad / Kol</h3>
+ <small id="gpst">Kol bağlı değil. Kolu bağla (USB/Bluetooth) ve bir tuşa bas.</small>
+ <div class="row"><span class="l">Kol tipi</span></div>
+ <div class="row"><button class="pb" data-gt="auto">Otomatik</button><button class="pb" data-gt="xbox">Xbox</button><button class="pb" data-gt="ps">PlayStation</button></div>
+ <div class="row"><span class="l">Bakış hassasiyeti</span><button class="pb" data-gs="-1">&minus;</button><span class="val" id="gsv">100%</span><button class="pb" data-gs="1">+</button></div>
+ <div class="row" id="gphrow"><span class="l">Kol varken ekran tuşlarını gizle</span><button class="pb" id="gph">Açık</button></div>
+ <div id="gpmap"></div>
+ <div class="row"><button class="pb" id="gpx">Kapat</button></div>
 </div></div>
 <div id="modb">&#x1F5FA; Mod ekle</div>
 <div id="modp"><div class="card">
@@ -111,7 +131,7 @@ function send(p,k){if(window.Module&&Module._dg_key)Module._dg_key(p?1:0,k);}
 addEventListener('keydown',function(e){var k=map(e);if(k==null)return;e.preventDefault();if(held[e.code])return;held[e.code]=k;send(1,k);});
 addEventListener('keyup',function(e){var k=held[e.code];if(k==null)return;e.preventDefault();delete held[e.code];send(0,k);});
 addEventListener('blur',function(){for(var c in held){send(0,held[c]);}held={};});
-var S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1};
+var S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1,pad:'auto',gsens:1,gh:1};
 function lrk(side){return S.lr==='turn'?(side<0?172:174):(side<0?160:161);}
 document.querySelectorAll('.b').forEach(function(b){
   var cur=0;
@@ -121,7 +141,7 @@ document.querySelectorAll('.b').forEach(function(b){
 });
 
 // ayarlar (boyut / saydamlık / D-Pad-Joystick), tarayıcıda saklanır
-try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));S.lr=t.lr==='turn'?'turn':'strafe';S.sens=Math.min(3,Math.max(.4,+t.sens||1));}}catch(e){}
+try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));S.lr=t.lr==='turn'?'turn':'strafe';S.sens=Math.min(3,Math.max(.4,+t.sens||1));S.pad=(t.pad==='xbox'||t.pad==='ps')?t.pad:'auto';S.gsens=Math.min(3,Math.max(.4,+t.gsens||1));S.gh=t.gh===0?0:1;}}catch(e){}
 function saveS(){try{localStorage.setItem('doomset',JSON.stringify(S))}catch(e){}}
 function applyS(){
   var r=document.documentElement.style;r.setProperty('--s',S.size);r.setProperty('--a',S.alpha);
@@ -133,7 +153,7 @@ function applyS(){
 }
 document.getElementById('gear').addEventListener('click',function(){document.getElementById('panel').classList.add('open')});
 document.getElementById('cls').addEventListener('click',function(){document.getElementById('panel').classList.remove('open')});
-document.getElementById('rst').addEventListener('click',function(){S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1};saveS();applyS();});
+document.getElementById('rst').addEventListener('click',function(){S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1,pad:'auto',gsens:1,gh:1};saveS();applyS();gpApply();});
 document.querySelectorAll('[data-st]').forEach(function(b){b.addEventListener('click',function(){S.style=b.dataset.st;saveS();applyS();})});
 document.querySelectorAll('[data-sz]').forEach(function(b){b.addEventListener('click',function(){S.size=Math.min(2,Math.max(.5,Math.round((S.size+.1*b.dataset.sz)*10)/10));saveS();applyS();})});
 document.querySelectorAll('[data-al]').forEach(function(b){b.addEventListener('click',function(){S.alpha=Math.min(1,Math.max(.2,Math.round((S.alpha+.1*b.dataset.al)*10)/10));saveS();applyS();})});
@@ -182,6 +202,79 @@ cv.addEventListener('pointerup',lend);cv.addEventListener('pointercancel',lend);
 document.addEventListener('pointerlockchange',function(){
   if(document.pointerLockElement!==cv&&!isTouch){mb=0;mouse(0);send(1,27);setTimeout(function(){send(0,27)},60);} // kilit açılınca Esc = menü
 });
+
+// ---- GAMEPAD (Xbox / PlayStation / standart kol) -- PC ve telefon ----
+// Tarayıcının standart Gamepad API'si kullanılır (lisans gerektirmez). PS ve Xbox kolları aynı eşlemeyi kullanır,
+// seçim sadece ekranda görünen buton isimlerini değiştirir.
+var GP={held:{},id:null,auto:'xbox',acc:0,t:0,prev:{},wp:1};
+var GL={
+ xbox:{a:'A',b:'B',x:'X',y:'Y',lb:'LB',rb:'RB',lt:'LT',rt:'RT',st:'Menu',se:'View',nm:'Xbox'},
+ ps:{a:'\u2715 (Çarpı)',b:'\u25CB (Daire)',x:'\u25A1 (Kare)',y:'\u25B3 (Üçgen)',lb:'L1',rb:'R1',lt:'L2',rt:'R2',st:'Options',se:'Create / Share',nm:'PlayStation'}
+};
+function gpDetect(id){id=id||'';if(/xbox|xinput|045e/i.test(id))return 'xbox';return /054c|sony|playstation|dualshock|dualsense|wireless controller|ps[345]/i.test(id)?'ps':'xbox';}
+function gpEff(){return S.pad==='auto'?GP.auto:S.pad;}
+function gpTap(k){send(1,k);setTimeout(function(){send(0,k)},60);}
+function gpRelease(){for(var k in GP.held){send(0,+k);}GP.held={};}
+function gpPoll(now){
+  requestAnimationFrame(gpPoll);
+  var pads=(navigator.getGamepads?navigator.getGamepads():[])||[],p=null;
+  for(var i=0;i<pads.length;i++){if(pads[i]&&pads[i].connected){p=pads[i];break;}}
+  var id=p?p.id:null;
+  if(id!==GP.id){GP.id=id;if(p)GP.auto=gpDetect(id);document.body.classList.toggle('gpon',!!p);gpApply();}
+  var want={};
+  if(p){
+    var dt=Math.min(3,Math.max(.3,(now-GP.t)/16.7||1));
+    var b=function(n){var x=p.buttons[n];return !!x&&(x.pressed||x.value>.5);};
+    var ax=function(n){return p.axes[n]||0;};
+    var DZ=.35;
+    if(b(0)){want[162]=1;want[13]=1;}            // A / Çarpı: kullan + onay
+    if(b(1)||b(7))want[163]=1;                   // B / RT: ateş
+    if(b(2)||b(6))want[182]=1;                   // X / LT: koş
+    if(b(9))want[27]=1;                          // Start: menü
+    if(b(8))want[9]=1;                           // Select: harita
+    if(b(12))want[173]=1;if(b(13))want[175]=1;if(b(14))want[172]=1;if(b(15))want[174]=1; // D-Pad
+    if(ax(1)<-DZ)want[173]=1;if(ax(1)>DZ)want[175]=1;                                      // sol çubuk: ileri/geri
+    if(ax(0)<-DZ)want[lrk(-1)]=1;if(ax(0)>DZ)want[lrk(1)]=1;                               // sol çubuk: yan adım/dönüş
+    // sağ çubuk: bakış
+    var rx=ax(2),dz=.15;
+    if(Math.abs(rx)>dz){var v=(Math.abs(rx)-dz)/(1-dz);GP.acc+=(rx<0?-1:1)*v*v*22*S.gsens*dt;}else GP.acc=0;
+    var d=Math.trunc(GP.acc);if(d){GP.acc-=d;mouse(d);}
+    // silah değiştir (kenar tetikli): Y/RB sonraki, LB önceki. Sahip olunmayan silahta değişmez, tekrar bas.
+    [[3,1],[5,1],[4,-1]].forEach(function(c){
+      var on=b(c[0]);
+      if(on&&!GP.prev[c[0]]){GP.wp+=c[1];if(GP.wp>5)GP.wp=1;if(GP.wp<1)GP.wp=5;gpTap(48+GP.wp);}
+      GP.prev[c[0]]=on;
+    });
+  }else{GP.prev={};GP.acc=0;}
+  GP.t=now;
+  for(var k in GP.held){if(!want[k]){delete GP.held[k];send(0,+k);}}
+  for(var k2 in want){if(!GP.held[k2]){GP.held[k2]=1;send(1,+k2);}}
+}
+function gpApply(){
+  var L=GL[gpEff()];
+  document.body.classList.toggle('gphide',!!S.gh);
+  document.querySelectorAll('[data-gt]').forEach(function(x){x.classList.toggle('sel',x.dataset.gt===S.pad)});
+  document.getElementById('gsv').textContent=Math.round(S.gsens*100)+'%';
+  document.getElementById('gph').textContent=S.gh?'Açık':'Kapalı';
+  var st=document.getElementById('gpst');
+  if(GP.id){var nm=GP.id.replace(/\(.*$/,'').trim()||'Kol';st.textContent='Bağlı: '+nm+' ('+GL[GP.auto].nm+' olarak algılandı)';st.className='ok';}
+  else{st.textContent='Kol bağlı değil. Kolu bağla (USB/Bluetooth) ve bir tuşa bas.';st.className='';}
+  var rows=[['Sol çubuk','Hareket (ileri/geri/yan adım)'],['Sağ çubuk','Bakış (sağa/sola)'],['D-Pad','Yön / menüde gezinme'],
+   [L.rt+' / '+L.b,'Ateş'],[L.a,'Kullan / menüde onay'],[L.lt+' / '+L.x,'Koş'],[L.rb+' / '+L.y,'Sonraki silah'],[L.lb,'Önceki silah'],
+   [L.st,'Menü (Esc)'],[L.se,'Harita (Tab)']];
+  document.getElementById('gpmap').innerHTML='<table>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'}).join('')+'</table>';
+}
+document.getElementById('gpb').addEventListener('click',function(){gpApply();document.getElementById('gpp').classList.add('open')});
+document.getElementById('gpx').addEventListener('click',function(){document.getElementById('gpp').classList.remove('open')});
+document.querySelectorAll('[data-gt]').forEach(function(x){x.addEventListener('click',function(){S.pad=x.dataset.gt;saveS();gpApply();})});
+document.querySelectorAll('[data-gs]').forEach(function(x){x.addEventListener('click',function(){S.gsens=Math.min(3,Math.max(.4,Math.round((S.gsens+.2*x.dataset.gs)*10)/10));saveS();gpApply();})});
+document.getElementById('gph').addEventListener('click',function(){S.gh=S.gh?0:1;saveS();gpApply();});
+addEventListener('blur',gpRelease);
+document.addEventListener('visibilitychange',function(){if(document.hidden)gpRelease();});
+addEventListener('gamepadconnected',function(){});
+addEventListener('gamepaddisconnected',function(){gpRelease();});
+gpApply();requestAnimationFrame(gpPoll);
+// ---- /GAMEPAD ----
 window.Module={
   canvas:document.getElementById('c'),
   print:function(t){console.log(t)},
