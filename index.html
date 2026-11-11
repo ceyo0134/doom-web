@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><title>DOOM Web - by ceyo0134</title>
 <style>
@@ -53,10 +53,12 @@ body.gpon #gpb{border-color:#6d6;opacity:1}
 #gpmap td{padding:4px;border-bottom:1px solid #333;vertical-align:top}
 #gpmap td:first-child{font-weight:700;white-space:nowrap;padding-right:10px}
 #gpst.ok{color:#7d7}
+#lgb{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));right:calc(152px + env(safe-area-inset-right,0px));z-index:10;min-width:40px;height:40px;padding:0 6px;box-sizing:border-box;border:1px solid #888;border-radius:8px;background:#2228;color:#fff;font:700 14px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;opacity:.7}
+.pc #lgb{right:calc(104px + env(safe-area-inset-right,0px))}
 </style></head><body>
 <canvas id="c" width="640" height="400" tabindex="0"></canvas>
-<div id="fs" title="Tam ekran">&#x26F6;</div>
-<div id="help">Fare: bakış (oyuna tıkla) · Sol tık: ateş · Sağ tık: kullan · WASD: hareket · Oklar: dönüş · Ctrl/F: ateş · Boşluk/E: kullan · Shift: koş · 1-7: silah · Esc: menü · Kol: sol çubuk hareket, sağ çubuk bakış, RT ateş, A kullan</div>
+<div id="fs" title="Fullscreen" data-i18n-title="fs">&#x26F6;</div>
+<div id="help" data-i18n="help">Mouse: look (click the game) · Left click: fire · Right click: use · WASD: move · Arrows: turn · Ctrl/F: fire · Space/E: use · Shift: run · 1-7: weapons · Esc: menu · Gamepad: left stick move, right stick look, RT fire, A use</div>
 <div id="pad">
   <div class="g" id="dp">
    <i></i><div class="b" data-k="173">&#9650;</div><i></i>
@@ -66,41 +68,44 @@ body.gpon #gpb{border-color:#6d6;opacity:1}
   <div id="jw"><div class="b" data-k="13">OK</div><div id="joy"><div id="knob"></div></div></div>
   <div class="g" id="ac">
    <div class="b" data-k="27">ESC</div><div class="b" data-k="49">1</div><div class="b" data-k="50">2</div>
-   <div class="b" data-k="162">KULLAN</div><div class="b" data-k="163">ATEŞ</div><div class="b" data-k="182">KOŞ</div>
+   <div class="b" data-k="162" data-i18n="b_use">USE</div><div class="b" data-k="163" data-i18n="b_fire">FIRE</div><div class="b" data-k="182" data-i18n="b_run">RUN</div>
   </div>
 </div>
-<div id="credit">Made by ceyo0134 · v8</div>
-<div id="gear" title="Kontrol ayarları">&#9881;</div>
+<div id="credit">Made by ceyo0134 · v9</div>
+<div id="gear" title="Control settings" data-i18n-title="ctl_title">&#9881;</div>
 <div id="panel"><div class="card">
- <h3>Kontrol ayarları</h3>
- <div class="row"><span class="l">Yön tuşu</span><button class="pb" data-st="dpad">D-Pad</button><button class="pb" data-st="joy">Joystick</button></div>
- <div class="row"><span class="l">Sol/Sağ tuşu</span><button class="pb" data-lr2="strafe">Yan adım</button><button class="pb" data-lr2="turn">Dönüş</button></div>
- <div class="row"><span class="l">Bakış hassasiyeti</span><button class="pb" data-se="-1">&minus;</button><span class="val" id="sev">100%</span><button class="pb" data-se="1">+</button></div>
- <div class="row"><span class="l">Boyut</span><button class="pb" data-sz="-1">&minus;</button><span class="val" id="szv">100%</span><button class="pb" data-sz="1">+</button></div>
- <div class="row"><span class="l">Saydamlık</span><button class="pb" data-al="-1">&minus;</button><span class="val" id="alv">100%</span><button class="pb" data-al="1">+</button></div>
- <div class="row"><button class="pb" id="rst">Sıfırla</button><button class="pb" id="cls">Kapat</button></div>
+ <h3 data-i18n="ctl_title">Control settings</h3>
+ <div class="row"><span class="l" data-i18n="ctl_dir">Direction pad</span><button class="pb" data-st="dpad">D-Pad</button><button class="pb" data-st="joy">Joystick</button></div>
+ <div class="row"><span class="l" data-i18n="ctl_lr">Left/Right button</span><button class="pb" data-lr2="strafe" data-i18n="strafe">Strafe</button><button class="pb" data-lr2="turn" data-i18n="turn">Turn</button></div>
+ <div class="row"><span class="l" data-i18n="ctl_sens">Look sensitivity</span><button class="pb" data-se="-1">&minus;</button><span class="val" id="sev">100%</span><button class="pb" data-se="1">+</button></div>
+ <div class="row"><span class="l" data-i18n="ctl_size">Size</span><button class="pb" data-sz="-1">&minus;</button><span class="val" id="szv">100%</span><button class="pb" data-sz="1">+</button></div>
+ <div class="row"><span class="l" data-i18n="ctl_alpha">Opacity</span><button class="pb" data-al="-1">&minus;</button><span class="val" id="alv">100%</span><button class="pb" data-al="1">+</button></div>
+ <div class="row"><span class="l" data-i18n="lang">Language</span><button class="pb" data-lang="en">EN</button><button class="pb" data-lang="tr">TR</button></div>
+ <div class="row"><button class="pb" id="rst" data-i18n="reset">Reset</button><button class="pb" id="cls" data-i18n="close">Close</button></div>
 </div></div>
-<div id="gpb" title="Gamepad / Kol">&#x1F3AE;</div>
+<div id="gpb" title="Gamepad" data-i18n-title="gp_title">&#x1F3AE;</div>
 <div id="gpp"><div class="card">
- <h3>Gamepad / Kol</h3>
- <small id="gpst">Kol bağlı değil. Kolu bağla (USB/Bluetooth) ve bir tuşa bas.</small>
- <div class="row"><span class="l">Kol tipi</span></div>
- <div class="row"><button class="pb" data-gt="auto">Otomatik</button><button class="pb" data-gt="xbox">Xbox</button><button class="pb" data-gt="ps">PlayStation</button></div>
- <div class="row"><span class="l">Bakış hassasiyeti</span><button class="pb" data-gs="-1">&minus;</button><span class="val" id="gsv">100%</span><button class="pb" data-gs="1">+</button></div>
- <div class="row" id="gphrow"><span class="l">Kol varken ekran tuşlarını gizle</span><button class="pb" id="gph">Açık</button></div>
+ <h3 data-i18n="gp_title">Gamepad</h3>
+ <small id="gpst"></small>
+ <div class="row"><span class="l" data-i18n="gp_type">Controller type</span></div>
+ <div class="row"><button class="pb" data-gt="auto" data-i18n="gp_auto">Auto</button><button class="pb" data-gt="xbox">Xbox</button><button class="pb" data-gt="ps">PlayStation</button></div>
+ <div class="row"><span class="l" data-i18n="ctl_sens">Look sensitivity</span><button class="pb" data-gs="-1">&minus;</button><span class="val" id="gsv">100%</span><button class="pb" data-gs="1">+</button></div>
+ <div class="row" id="gphrow"><span class="l" data-i18n="gp_hide">Hide on-screen buttons while a gamepad is connected</span><button class="pb" id="gph">On</button></div>
+ <div class="row"><span class="l" data-i18n="lang">Language</span><button class="pb" data-lang="en">EN</button><button class="pb" data-lang="tr">TR</button></div>
  <div id="gpmap"></div>
- <div class="row"><button class="pb" id="gpx">Kapat</button></div>
+ <div class="row"><button class="pb" id="gpx" data-i18n="close">Close</button></div>
 </div></div>
-<div id="modb">&#x1F5FA; Mod ekle</div>
+<div id="modb">&#x1F5FA; Add mod</div>
+<div id="lgb" title="Language / Dil">EN</div>
 <div id="modp"><div class="card">
- <h3>Harita modu ekle</h3>
- <small>Tek harita (.wad / PWAD). Doom 1 formatında (E1M1&ndash;E1M9) ve sadece harita olmalı (özel doku/ses/sprite desteklenmez). Eklenince oyun o haritadan başlar; eklediğin harita, oyundaki aynı numaralı haritanın yerine geçer.</small>
- <label class="fl"><input type="file" id="modf" accept=".wad,.pwad,application/octet-stream">&#x1F4C2; Dosya seç (.wad)</label>
+ <h3 data-i18n="mod_title">Add map mod</h3>
+ <small data-i18n="mod_info">Single map (.wad / PWAD). Must be in Doom 1 format (E1M1&ndash;E1M9) and contain only the map (custom textures/sounds/sprites are not supported). Once added, the game starts from that map; it replaces the map with the same number in the game.</small>
+ <label class="fl"><input type="file" id="modf" accept=".wad,.pwad,application/octet-stream">&#x1F4C2; <span data-i18n="mod_file">Choose file (.wad)</span></label>
  <div id="modcur"></div>
  <div id="modst"></div>
- <div class="row"><button class="pb" id="modrm">Modu kaldır</button><button class="pb" id="modx">Kapat</button></div>
+ <div class="row"><button class="pb" id="modrm" data-i18n="mod_rm">Remove mod</button><button class="pb" id="modx" data-i18n="close">Close</button></div>
 </div></div>
-<div id="msg">DOOM yükleniyor… (~4 MB)</div>
+<div id="msg" data-i18n="loading_full">Loading DOOM… (~4 MB)</div>
 <script>
 var KEYS={ArrowLeft:172,ArrowRight:174,ArrowUp:173,ArrowDown:175,Enter:13,Escape:27,Tab:9,Backspace:127,
  ControlLeft:163,ControlRight:163,KeyF:163,Space:162,KeyE:162,ShiftLeft:182,ShiftRight:182,AltLeft:184,AltRight:184,
@@ -131,7 +136,7 @@ function send(p,k){if(window.Module&&Module._dg_key)Module._dg_key(p?1:0,k);}
 addEventListener('keydown',function(e){var k=map(e);if(k==null)return;e.preventDefault();if(held[e.code])return;held[e.code]=k;send(1,k);});
 addEventListener('keyup',function(e){var k=held[e.code];if(k==null)return;e.preventDefault();delete held[e.code];send(0,k);});
 addEventListener('blur',function(){for(var c in held){send(0,held[c]);}held={};});
-var S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1,pad:'auto',gsens:1,gh:1};
+var S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1,pad:'auto',gsens:1,gh:1,lang:'en'};
 function lrk(side){return S.lr==='turn'?(side<0?172:174):(side<0?160:161);}
 document.querySelectorAll('.b').forEach(function(b){
   var cur=0;
@@ -141,7 +146,7 @@ document.querySelectorAll('.b').forEach(function(b){
 });
 
 // ayarlar (boyut / saydamlık / D-Pad-Joystick), tarayıcıda saklanır
-try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));S.lr=t.lr==='turn'?'turn':'strafe';S.sens=Math.min(3,Math.max(.4,+t.sens||1));S.pad=(t.pad==='xbox'||t.pad==='ps')?t.pad:'auto';S.gsens=Math.min(3,Math.max(.4,+t.gsens||1));S.gh=t.gh===0?0:1;}}catch(e){}
+try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));S.lr=t.lr==='turn'?'turn':'strafe';S.sens=Math.min(3,Math.max(.4,+t.sens||1));S.pad=(t.pad==='xbox'||t.pad==='ps')?t.pad:'auto';S.gsens=Math.min(3,Math.max(.4,+t.gsens||1));S.gh=t.gh===0?0:1;S.lang=t.lang==='tr'?'tr':'en';}}catch(e){}
 function saveS(){try{localStorage.setItem('doomset',JSON.stringify(S))}catch(e){}}
 function applyS(){
   var r=document.documentElement.style;r.setProperty('--s',S.size);r.setProperty('--a',S.alpha);
@@ -153,13 +158,64 @@ function applyS(){
 }
 document.getElementById('gear').addEventListener('click',function(){document.getElementById('panel').classList.add('open')});
 document.getElementById('cls').addEventListener('click',function(){document.getElementById('panel').classList.remove('open')});
-document.getElementById('rst').addEventListener('click',function(){S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1,pad:'auto',gsens:1,gh:1};saveS();applyS();gpApply();});
+document.getElementById('rst').addEventListener('click',function(){var lg=S.lang;S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1,pad:'auto',gsens:1,gh:1,lang:lg};saveS();applyS();gpApply();});
 document.querySelectorAll('[data-st]').forEach(function(b){b.addEventListener('click',function(){S.style=b.dataset.st;saveS();applyS();})});
 document.querySelectorAll('[data-sz]').forEach(function(b){b.addEventListener('click',function(){S.size=Math.min(2,Math.max(.5,Math.round((S.size+.1*b.dataset.sz)*10)/10));saveS();applyS();})});
 document.querySelectorAll('[data-al]').forEach(function(b){b.addEventListener('click',function(){S.alpha=Math.min(1,Math.max(.2,Math.round((S.alpha+.1*b.dataset.al)*10)/10));saveS();applyS();})});
 document.querySelectorAll('[data-lr2]').forEach(function(b){b.addEventListener('click',function(){S.lr=b.dataset.lr2;saveS();applyS();})});
 document.querySelectorAll('[data-se]').forEach(function(b){b.addEventListener('click',function(){S.sens=Math.min(3,Math.max(.4,Math.round((S.sens+.2*b.dataset.se)*10)/10));saveS();applyS();})});
 applyS();
+
+// ---- DİL / LANGUAGE (varsayılan: English) ----
+var LANG={
+en:{fs:'Fullscreen',ctl_title:'Control settings',ctl_dir:'Direction pad',ctl_lr:'Left/Right button',strafe:'Strafe',turn:'Turn',ctl_sens:'Look sensitivity',ctl_size:'Size',ctl_alpha:'Opacity',lang:'Language',reset:'Reset',close:'Close',
+ b_use:'USE',b_fire:'FIRE',b_run:'RUN',
+ help:'Mouse: look (click the game) · Left click: fire · Right click: use · WASD: move · Arrows: turn · Ctrl/F: fire · Space/E: use · Shift: run · 1-7: weapons · Esc: menu · Gamepad: left stick move, right stick look, RT fire, A use',
+ loading_full:'Loading DOOM… (~4 MB)',loading:'Loading DOOM…',
+ gp_title:'Gamepad',gp_type:'Controller type',gp_auto:'Auto',gp_hide:'Hide on-screen buttons while a gamepad is connected',on:'On',off:'Off',
+ gp_none:'No gamepad connected. Connect one (USB/Bluetooth) and press a button.',gp_conn:'Connected: {0} (detected as {1})',
+ cross:'✕ (Cross)',circle:'○ (Circle)',square:'□ (Square)',triangle:'△ (Triangle)',
+ m_lstick:'Left stick',m_lstick_d:'Move (forward/back/strafe)',m_rstick:'Right stick',m_rstick_d:'Look (left/right)',m_dpad:'D-Pad',m_dpad_d:'Move / menu navigation',
+ m_fire:'Fire',m_use:'Use / confirm in menus',m_run:'Run',m_next:'Next weapon',m_prev:'Previous weapon',m_menu:'Menu (Esc)',m_map:'Map (Tab)',
+ mod_title:'Add map mod',mod_info:'Single map (.wad / PWAD). Must be in Doom 1 format (E1M1–E1M9) and contain only the map (custom textures/sounds/sprites are not supported). Once added, the game starts from that map; it replaces the map with the same number in the game.',
+ mod_file:'Choose file (.wad)',mod_rm:'Remove mod',mod_btn:'Add mod',mod_btn_on:'Mod: ',mod_active:'Active mod: ',mod_none:'No active mod',
+ e_invalid:'Invalid file',e_notwad:'This is not a WAD file',e_iwad:'This is a full game WAD (IWAD), not a map mod (PWAD)',e_corrupt:'WAD is corrupt',
+ e_doom2:'This map is in Doom 2 format (MAPxx). It does not work with the Doom 1 on this site',e_nomap:'No map found in the WAD (like E1M1)',
+ e_ep:'This site is a Doom 1 demo (episode 1 only). Map is E{0}M{1}, it must be E1Mx',e_lumps:'Map lumps are missing/corrupt ({0} not found)',e_corrupt2:'WAD is corrupt ({0})',
+ e_dl:'Could not download game data',e_nomapingame:'{0} is not in the game',
+ s_big:'File too large (max 60 MB)',s_read:'Reading…',s_readerr:'Could not read the file',s_storage:'Browser storage is disabled (private tab?). Try a normal tab',s_added:'Added! Restarting…',
+ f_stopped:'The game stopped while loading the mod',f_btn:'Remove mod and reload'},
+tr:{fs:'Tam ekran',ctl_title:'Kontrol ayarları',ctl_dir:'Yön tuşu',ctl_lr:'Sol/Sağ tuşu',strafe:'Yan adım',turn:'Dönüş',ctl_sens:'Bakış hassasiyeti',ctl_size:'Boyut',ctl_alpha:'Saydamlık',lang:'Dil',reset:'Sıfırla',close:'Kapat',
+ b_use:'KULLAN',b_fire:'ATEŞ',b_run:'KOŞ',
+ help:'Fare: bakış (oyuna tıkla) · Sol tık: ateş · Sağ tık: kullan · WASD: hareket · Oklar: dönüş · Ctrl/F: ateş · Boşluk/E: kullan · Shift: koş · 1-7: silah · Esc: menü · Kol: sol çubuk hareket, sağ çubuk bakış, RT ateş, A kullan',
+ loading_full:'DOOM yükleniyor… (~4 MB)',loading:'DOOM yükleniyor…',
+ gp_title:'Gamepad / Kol',gp_type:'Kol tipi',gp_auto:'Otomatik',gp_hide:'Kol varken ekran tuşlarını gizle',on:'Açık',off:'Kapalı',
+ gp_none:'Kol bağlı değil. Kolu bağla (USB/Bluetooth) ve bir tuşa bas.',gp_conn:'Bağlı: {0} ({1} olarak algılandı)',
+ cross:'✕ (Çarpı)',circle:'○ (Daire)',square:'□ (Kare)',triangle:'△ (Üçgen)',
+ m_lstick:'Sol çubuk',m_lstick_d:'Hareket (ileri/geri/yan adım)',m_rstick:'Sağ çubuk',m_rstick_d:'Bakış (sağa/sola)',m_dpad:'D-Pad',m_dpad_d:'Yön / menüde gezinme',
+ m_fire:'Ateş',m_use:'Kullan / menüde onay',m_run:'Koş',m_next:'Sonraki silah',m_prev:'Önceki silah',m_menu:'Menü (Esc)',m_map:'Harita (Tab)',
+ mod_title:'Harita modu ekle',mod_info:'Tek harita (.wad / PWAD). Doom 1 formatında (E1M1–E1M9) ve sadece harita olmalı (özel doku/ses/sprite desteklenmez). Eklenince oyun o haritadan başlar; eklediğin harita, oyundaki aynı numaralı haritanın yerine geçer.',
+ mod_file:'Dosya seç (.wad)',mod_rm:'Modu kaldır',mod_btn:'Mod ekle',mod_btn_on:'Mod: ',mod_active:'Aktif mod: ',mod_none:'Aktif mod yok',
+ e_invalid:'Geçersiz dosya',e_notwad:'Bu bir WAD dosyası değil',e_iwad:'Bu tam bir oyun WAD\'ı (IWAD), harita modu (PWAD) değil',e_corrupt:'WAD bozuk',
+ e_doom2:'Bu harita Doom 2 formatında (MAPxx). Bu sitedeki Doom 1 ile çalışmaz',e_nomap:'WAD içinde harita bulunamadı (E1M1 gibi)',
+ e_ep:'Bu site Doom 1 demosu (sadece 1. bölüm). Harita E{0}M{1} için, E1Mx olmalı',e_lumps:'Harita lump\'ları eksik/bozuk ({0} yok)',e_corrupt2:'WAD bozuk ({0})',
+ e_dl:'oyun verisi indirilemedi',e_nomapingame:'{0} oyunda yok',
+ s_big:'Dosya çok büyük (en fazla 60 MB)',s_read:'Okunuyor…',s_readerr:'Dosya okunamadı',s_storage:'Tarayıcı depolaması kapalı (gizli sekme?). Normal sekmede dene',s_added:'Eklendi! Yeniden başlatılıyor…',
+ f_stopped:'Mod yüklenirken oyun durdu',f_btn:'Modu kaldır ve yenile'}
+};
+function _t(k){var d=LANG[S.lang]||LANG.en,v=d[k];if(v==null)v=LANG.en[k];if(v==null)return k;for(var i=1;i<arguments.length;i++)v=v.replace('{'+(i-1)+'}',arguments[i]);return v;}
+function applyLang(){
+  document.documentElement.lang=S.lang;
+  document.querySelectorAll('[data-i18n]').forEach(function(e){e.textContent=_t(e.dataset.i18n)});
+  document.querySelectorAll('[data-i18n-title]').forEach(function(e){e.title=_t(e.dataset.i18nTitle)});
+  document.querySelectorAll('[data-lang]').forEach(function(b){b.classList.toggle('sel',b.dataset.lang===S.lang)});
+  document.getElementById('lgb').textContent=S.lang.toUpperCase();
+  gpApply();showCur();
+}
+function setLang(l){S.lang=l==='tr'?'tr':'en';saveS();applyLang();}
+document.querySelectorAll('[data-lang]').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.lang)})});
+document.getElementById('lgb').addEventListener('click',function(){setLang(S.lang==='tr'?'en':'tr')});
+// ---- /DİL ----
 // joystick: yukarı/aşağı/sol/sağ (çapraz da olur)
 var joy=document.getElementById('joy'),knob=document.getElementById('knob'),jst={u:0,d:0,l:0,r:0},jid=null;
 function jset(n,on){var key=n=='u'?173:n=='d'?175:n=='l'?lrk(-1):lrk(1);if(on&&!jst[n]){jst[n]=key;send(1,key);}else if(!on&&jst[n]){send(0,jst[n]);jst[n]=0;}}
@@ -207,10 +263,7 @@ document.addEventListener('pointerlockchange',function(){
 // Tarayıcının standart Gamepad API'si kullanılır (lisans gerektirmez). PS ve Xbox kolları aynı eşlemeyi kullanır,
 // seçim sadece ekranda görünen buton isimlerini değiştirir.
 var GP={held:{},id:null,auto:'xbox',acc:0,t:0,prev:{},wp:1};
-var GL={
- xbox:{a:'A',b:'B',x:'X',y:'Y',lb:'LB',rb:'RB',lt:'LT',rt:'RT',st:'Menu',se:'View',nm:'Xbox'},
- ps:{a:'\u2715 (Çarpı)',b:'\u25CB (Daire)',x:'\u25A1 (Kare)',y:'\u25B3 (Üçgen)',lb:'L1',rb:'R1',lt:'L2',rt:'R2',st:'Options',se:'Create / Share',nm:'PlayStation'}
-};
+function gpGL(t){return t==='ps'?{a:_t('cross'),b:_t('circle'),x:_t('square'),y:_t('triangle'),lb:'L1',rb:'R1',lt:'L2',rt:'R2',st:'Options',se:'Create / Share',nm:'PlayStation'}:{a:'A',b:'B',x:'X',y:'Y',lb:'LB',rb:'RB',lt:'LT',rt:'RT',st:'Menu',se:'View',nm:'Xbox'};}
 function gpDetect(id){id=id||'';if(/xbox|xinput|045e/i.test(id))return 'xbox';return /054c|sony|playstation|dualshock|dualsense|wireless controller|ps[345]/i.test(id)?'ps':'xbox';}
 function gpEff(){return S.pad==='auto'?GP.auto:S.pad;}
 function gpTap(k){send(1,k);setTimeout(function(){send(0,k)},60);}
@@ -251,17 +304,17 @@ function gpPoll(now){
   for(var k2 in want){if(!GP.held[k2]){GP.held[k2]=1;send(1,+k2);}}
 }
 function gpApply(){
-  var L=GL[gpEff()];
+  var L=gpGL(gpEff());
   document.body.classList.toggle('gphide',!!S.gh);
   document.querySelectorAll('[data-gt]').forEach(function(x){x.classList.toggle('sel',x.dataset.gt===S.pad)});
   document.getElementById('gsv').textContent=Math.round(S.gsens*100)+'%';
-  document.getElementById('gph').textContent=S.gh?'Açık':'Kapalı';
+  document.getElementById('gph').textContent=S.gh?_t('on'):_t('off');
   var st=document.getElementById('gpst');
-  if(GP.id){var nm=GP.id.replace(/\(.*$/,'').trim()||'Kol';st.textContent='Bağlı: '+nm+' ('+GL[GP.auto].nm+' olarak algılandı)';st.className='ok';}
-  else{st.textContent='Kol bağlı değil. Kolu bağla (USB/Bluetooth) ve bir tuşa bas.';st.className='';}
-  var rows=[['Sol çubuk','Hareket (ileri/geri/yan adım)'],['Sağ çubuk','Bakış (sağa/sola)'],['D-Pad','Yön / menüde gezinme'],
-   [L.rt+' / '+L.b,'Ateş'],[L.a,'Kullan / menüde onay'],[L.lt+' / '+L.x,'Koş'],[L.rb+' / '+L.y,'Sonraki silah'],[L.lb,'Önceki silah'],
-   [L.st,'Menü (Esc)'],[L.se,'Harita (Tab)']];
+  if(GP.id){var nm=GP.id.replace(/\(.*$/,'').trim()||'Kol';st.textContent=_t('gp_conn',nm,gpGL(GP.auto).nm);st.className='ok';}
+  else{st.textContent=_t('gp_none');st.className='';}
+  var rows=[[_t('m_lstick'),_t('m_lstick_d')],[_t('m_rstick'),_t('m_rstick_d')],[_t('m_dpad'),_t('m_dpad_d')],
+   [L.rt+' / '+L.b,_t('m_fire')],[L.a,_t('m_use')],[L.lt+' / '+L.x,_t('m_run')],[L.rb+' / '+L.y,_t('m_next')],[L.lb,_t('m_prev')],
+   [L.st,_t('m_menu')],[L.se,_t('m_map')]];
   document.getElementById('gpmap').innerHTML='<table>'+rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'}).join('')+'</table>';
 }
 document.getElementById('gpb').addEventListener('click',function(){gpApply();document.getElementById('gpp').classList.add('open')});
@@ -279,7 +332,7 @@ window.Module={
   canvas:document.getElementById('c'),
   print:function(t){console.log(t)},
   printErr:function(t){console.warn(t)},
-  setStatus:function(s){var m=document.getElementById('msg');if(!m)return;if(s)m.textContent='DOOM yükleniyor… '+s;else{m.remove();document.getElementById('c').focus();}},
+  setStatus:function(s){var m=document.getElementById('msg');if(!m)return;if(s)m.textContent=_t('loading')+' '+s;else{m.remove();document.getElementById('c').focus();}},
   postRun:[function(){var m=document.getElementById('msg');if(m)m.remove();document.getElementById('c').focus();}]
 };
 
@@ -290,52 +343,52 @@ function idbGet(cb){idb(function(e,db){if(e)return cb(null);var q=db.transaction
 function idbSet(v,cb){idb(function(e,db){if(e)return cb(e);var t=db.transaction('m','readwrite'),st=t.objectStore('m');if(v)st.put(v,'mod');else st.delete('mod');t.oncomplete=function(){cb(null)};t.onerror=function(){cb(t.error||new Error('hata'))};});}
 var MAPL=['THINGS','LINEDEFS','SIDEDEFS','VERTEXES','SEGS','SSECTORS','NODES','SECTORS','REJECT','BLOCKMAP'];
 function parseWad(buf){
-  var dv=new DataView(buf);if(buf.byteLength<12)throw new Error('Geçersiz dosya');
+  var dv=new DataView(buf);if(buf.byteLength<12)throw new Error(_t('e_invalid'));
   var id=String.fromCharCode(dv.getUint8(0),dv.getUint8(1),dv.getUint8(2),dv.getUint8(3));
-  if(id!=='PWAD'&&id!=='IWAD')throw new Error('Bu bir WAD dosyası değil');
-  if(id==='IWAD')throw new Error('Bu tam bir oyun WAD\'ı (IWAD), harita modu (PWAD) değil');
+  if(id!=='PWAD'&&id!=='IWAD')throw new Error(_t('e_notwad'));
+  if(id==='IWAD')throw new Error(_t('e_iwad'));
   var n=dv.getInt32(4,true),o=dv.getInt32(8,true);
-  if(n<0||o<12||o+n*16>buf.byteLength)throw new Error('WAD bozuk');
+  if(n<0||o<12||o+n*16>buf.byteLength)throw new Error(_t('e_corrupt'));
   var L=[];for(var i=0;i<n;i++){var p=o+i*16,nm='';for(var j=0;j<8;j++){var c=dv.getUint8(p+8+j);if(!c)break;nm+=String.fromCharCode(c)}L.push({name:nm.toUpperCase(),pos:dv.getInt32(p,true),size:dv.getInt32(p+4,true)});}
   var maps=[];L.forEach(function(x,i){var m=/^E(\d)M(\d)$/.exec(x.name);if(m)maps.push({ep:+m[1],map:+m[2],i:i});});
-  if(!maps.length){if(L.some(function(x){return /^MAP\d\d$/.test(x.name)}))throw new Error('Bu harita Doom 2 formatında (MAPxx). Bu sitedeki Doom 1 ile çalışmaz');throw new Error('WAD içinde harita bulunamadı (E1M1 gibi)');}
+  if(!maps.length){if(L.some(function(x){return /^MAP\d\d$/.test(x.name)}))throw new Error(_t('e_doom2'));throw new Error(_t('e_nomap'));}
   maps.sort(function(a,b){return a.ep*10+a.map-b.ep*10-b.map});
-  var mp=maps[0];if(mp.ep!==1)throw new Error('Bu site Doom 1 demosu (sadece 1. bölüm). Harita E'+mp.ep+'M'+mp.map+' için, E1Mx olmalı');
+  var mp=maps[0];if(mp.ep!==1)throw new Error(_t('e_ep',mp.ep,mp.map));
   var lumps=[];for(var k=0;k<10;k++){var e=L[mp.i+1+k];
-    if(!e||e.name!==MAPL[k])throw new Error('Harita lump\'ları eksik/bozuk ('+MAPL[k]+' yok)');
-    if(e.pos<0||e.size<0||e.pos+e.size>buf.byteLength)throw new Error('WAD bozuk ('+e.name+')');
+    if(!e||e.name!==MAPL[k])throw new Error(_t('e_lumps',MAPL[k]));
+    if(e.pos<0||e.size<0||e.pos+e.size>buf.byteLength)throw new Error(_t('e_corrupt2',e.name));
     lumps.push({pos:e.pos,size:e.size});}
   return {warp:[mp.ep,mp.map],lumps:lumps};
 }
 // Shareware Doom "-file" yasaklıyor; bu yüzden harita lump'larını oyunun kendi WAD'ına yerleştiriyoruz
 function buildIwad(mod){
   var info=parseWad(mod.data);
-  return fetch('doom_web5.data').then(function(r){if(!r.ok)throw new Error('oyun verisi indirilemedi');return r.arrayBuffer();}).then(function(ab){
+  return fetch('doom_web5.data').then(function(r){if(!r.ok)throw new Error(_t('e_dl'));return r.arrayBuffer();}).then(function(ab){
     var src=new Uint8Array(ab),dv0=new DataView(ab),n=dv0.getInt32(4,true),o=dv0.getInt32(8,true),want='E'+info.warp[0]+'M'+info.warp[1],idx=-1;
     for(var i=0;i<n&&idx<0;i++){var p=o+i*16,nm='';for(var j=0;j<8;j++){var c=src[p+8+j];if(!c)break;nm+=String.fromCharCode(c)}if(nm===want)idx=i;}
-    if(idx<0)throw new Error(want+' oyunda yok');
+    if(idx<0)throw new Error(_t('e_nomapingame',want));
     var extra=0;info.lumps.forEach(function(l){extra+=l.size});
     var out=new Uint8Array(src.length+extra);out.set(src);var dv=new DataView(out.buffer),cur=src.length,md=new Uint8Array(mod.data);
     info.lumps.forEach(function(l,k){out.set(md.subarray(l.pos,l.pos+l.size),cur);var ep=o+(idx+1+k)*16;dv.setInt32(ep,cur,true);dv.setInt32(ep+4,l.size,true);cur+=l.size;});
     return out;});
 }
 function setSt(t,c){modSt.textContent=t;modSt.className=c||'';}
-function showCur(){document.getElementById('modcur').textContent=MOD?('Aktif mod: '+MOD.name+' (E'+MOD.warp[0]+'M'+MOD.warp[1]+')'):'Aktif mod yok';document.getElementById('modrm').style.display=MOD?'':'none';document.getElementById('modb').innerHTML='&#x1F5FA; '+(MOD?'Mod: '+MOD.name.slice(0,14):'Mod ekle');}
+function showCur(){document.getElementById('modcur').textContent=MOD?(_t('mod_active')+MOD.name+' (E'+MOD.warp[0]+'M'+MOD.warp[1]+')'):_t('mod_none');document.getElementById('modrm').style.display=MOD?'':'none';document.getElementById('modb').textContent='\uD83D\uDDFA\uFE0F '+(MOD?_t('mod_btn_on')+MOD.name.slice(0,14):_t('mod_btn'));}
 document.getElementById('modb').addEventListener('click',function(){setSt('');showCur();document.getElementById('modp').classList.add('open')});
 document.getElementById('modx').addEventListener('click',function(){document.getElementById('modp').classList.remove('open')});
 document.getElementById('modrm').addEventListener('click',function(){idbSet(null,function(){location.href=location.pathname+'?nomod=1&t='+Date.now();});});
 document.getElementById('modf').addEventListener('change',function(){
   var f=this.files&&this.files[0];if(!f)return;
-  if(f.size>60*1024*1024){setSt('Dosya çok büyük (en fazla 60 MB)','err');return;}
-  setSt('Okunuyor…');
-  var r=new FileReader();r.onerror=function(){setSt('Dosya okunamadı','err')};
+  if(f.size>60*1024*1024){setSt(_t('s_big'),'err');return;}
+  setSt(_t('s_read'));
+  var r=new FileReader();r.onerror=function(){setSt(_t('s_readerr'),'err')};
   r.onload=function(){var warp;try{warp=parseWad(r.result).warp}catch(e){setSt(e.message,'err');return;}
     idbSet({name:f.name.replace(/\.[^.]+$/,''),data:r.result,warp:warp},function(err){
-      if(err){setSt('Tarayıcı depolaması kapalı (gizli sekme?). Normal sekmede dene','err');return;}
-      setSt('Eklendi! Yeniden başlatılıyor…','ok');setTimeout(function(){location.href=location.pathname+'?t='+Date.now();},500);});};
+      if(err){setSt(_t('s_storage'),'err');return;}
+      setSt(_t('s_added'),'ok');setTimeout(function(){location.href=location.pathname+'?t='+Date.now();},500);});};
   r.readAsArrayBuffer(f);
 });
-function modFail(force,why){if(!MOD||window._mf)return;window._mf=1;var m=document.createElement('div');m.id='msg';m.innerHTML='Mod yüklenirken oyun durdu'+(why?' ('+String(why).replace(/[<>&]/g,'')+')':'')+'.<br><br><button class="pb" id="mf">Modu kaldır ve yenile</button>';document.body.appendChild(m);document.getElementById('mf').onclick=function(){idbSet(null,function(){location.href=location.pathname+'?nomod=1&t='+Date.now();});};}
+function modFail(force,why){if(!MOD||window._mf)return;window._mf=1;var m=document.createElement('div');m.id='msg';m.innerHTML=_t('f_stopped')+(why?' ('+String(why).replace(/[<>&]/g,'')+')':'')+'.<br><br><button class="pb" id="mf">'+_t('f_btn')+'</button>';document.body.appendChild(m);document.getElementById('mf').onclick=function(){idbSet(null,function(){location.href=location.pathname+'?nomod=1&t='+Date.now();});};}
 Module.onAbort=modFail;Module.onExit=function(c){if(c)modFail();};
 function loadEngine(){var sc=document.createElement('script');sc.src='doom_web5.js?v=7';document.body.appendChild(sc);}
 function startDoom(){
@@ -346,6 +399,7 @@ function startDoom(){
     loadEngine();
   }).catch(function(e){console.warn(e);modFail(true,e&&e.message);});
 }
+applyLang();
 if(/[?&]nomod=1/.test(location.search)){showCur();startDoom();}
 else idbGet(function(m){MOD=m;showCur();startDoom();});
 </script>
