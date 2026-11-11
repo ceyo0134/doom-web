@@ -40,11 +40,11 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
 </style></head><body>
 <canvas id="c" width="640" height="400" tabindex="0"></canvas>
 <div id="fs" title="Tam ekran">&#x26F6;</div>
-<div id="help">Yön: oklar/WASD · Ateş: Ctrl/F · Kullan: Boşluk/E · Koş: Shift · Silah: 1-7 · Menü: Esc · Seç: Enter · Tam ekran: sağ üst buton</div>
+<div id="help">Fare: bakış (oyuna tıkla) · Sol tık: ateş · Sağ tık: kullan · WASD: hareket · Oklar: dönüş · Ctrl/F: ateş · Boşluk/E: kullan · Shift: koş · 1-7: silah · Esc: menü</div>
 <div id="pad">
   <div class="g" id="dp">
    <i></i><div class="b" data-k="173">&#9650;</div><i></i>
-   <div class="b" data-k="172">&#9664;</div><div class="b" data-k="13">OK</div><div class="b" data-k="174">&#9654;</div>
+   <div class="b" data-lr="-1">&#9664;</div><div class="b" data-k="13">OK</div><div class="b" data-lr="1">&#9654;</div>
    <i></i><div class="b" data-k="175">&#9660;</div><i></i>
   </div>
   <div id="jw"><div class="b" data-k="13">OK</div><div id="joy"><div id="knob"></div></div></div>
@@ -58,6 +58,8 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
 <div id="panel"><div class="card">
  <h3>Kontrol ayarları</h3>
  <div class="row"><span class="l">Yön tuşu</span><button class="pb" data-st="dpad">D-Pad</button><button class="pb" data-st="joy">Joystick</button></div>
+ <div class="row"><span class="l">Sol/Sağ tuşu</span><button class="pb" data-lr2="strafe">Yan adım</button><button class="pb" data-lr2="turn">Dönüş</button></div>
+ <div class="row"><span class="l">Bakış hassasiyeti</span><button class="pb" data-se="-1">&minus;</button><span class="val" id="sev">100%</span><button class="pb" data-se="1">+</button></div>
  <div class="row"><span class="l">Boyut</span><button class="pb" data-sz="-1">&minus;</button><span class="val" id="szv">100%</span><button class="pb" data-sz="1">+</button></div>
  <div class="row"><span class="l">Saydamlık</span><button class="pb" data-al="-1">&minus;</button><span class="val" id="alv">100%</span><button class="pb" data-al="1">+</button></div>
  <div class="row"><button class="pb" id="rst">Sıfırla</button><button class="pb" id="cls">Kapat</button></div>
@@ -66,7 +68,7 @@ canvas{position:fixed;left:0;top:0;width:100%;height:100%;object-fit:contain;obj
 <script>
 var KEYS={ArrowLeft:172,ArrowRight:174,ArrowUp:173,ArrowDown:175,Enter:13,Escape:27,Tab:9,Backspace:127,
  ControlLeft:163,ControlRight:163,KeyF:163,Space:162,KeyE:162,ShiftLeft:182,ShiftRight:182,AltLeft:184,AltRight:184,
- KeyW:173,KeyS:175,KeyA:172,KeyD:174,KeyQ:160,Comma:160,Period:161,Minus:45,Equal:61};
+ KeyW:173,KeyS:175,KeyA:160,KeyD:161,Comma:160,Period:161,Minus:45,Equal:61};
 function map(e){
   if(KEYS[e.code]!=null)return KEYS[e.code];
   if(/^Digit[0-9]$/.test(e.code))return e.code.charCodeAt(5);
@@ -87,51 +89,80 @@ function goFull(){
     if(p&&p.then)p.then(lock).catch(function(){});else lock();}
 }
 document.getElementById('fs').addEventListener('click',goFull);
-document.getElementById('c').addEventListener('dblclick',goFull);
 addEventListener('contextmenu',function(e){e.preventDefault()});
 var held={};
 function send(p,k){if(window.Module&&Module._dg_key)Module._dg_key(p?1:0,k);}
 addEventListener('keydown',function(e){var k=map(e);if(k==null)return;e.preventDefault();if(held[e.code])return;held[e.code]=k;send(1,k);});
 addEventListener('keyup',function(e){var k=held[e.code];if(k==null)return;e.preventDefault();delete held[e.code];send(0,k);});
 addEventListener('blur',function(){for(var c in held){send(0,held[c]);}held={};});
+var S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1};
+function lrk(side){return S.lr==='turn'?(side<0?172:174):(side<0?160:161);}
 document.querySelectorAll('.b').forEach(function(b){
-  var k=+b.dataset.k;
-  b.addEventListener('pointerdown',function(e){e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('on');send(1,k);});
-  var up=function(e){b.classList.remove('on');send(0,k);};
+  var cur=0;
+  b.addEventListener('pointerdown',function(e){e.preventDefault();b.setPointerCapture(e.pointerId);b.classList.add('on');cur=b.dataset.lr?lrk(+b.dataset.lr):+b.dataset.k;send(1,cur);});
+  var up=function(e){b.classList.remove('on');if(cur){send(0,cur);cur=0;}};
   b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
 });
 
 // ayarlar (boyut / saydamlık / D-Pad-Joystick), tarayıcıda saklanır
-var S={style:'dpad',size:1,alpha:1};
-try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));}}catch(e){}
+try{var t=JSON.parse(localStorage.getItem('doomset')||'null');if(t){S.style=t.style==='joy'?'joy':'dpad';S.size=Math.min(2,Math.max(.5,+t.size||1));S.alpha=Math.min(1,Math.max(.2,+t.alpha||1));S.lr=t.lr==='turn'?'turn':'strafe';S.sens=Math.min(3,Math.max(.4,+t.sens||1));}}catch(e){}
 function saveS(){try{localStorage.setItem('doomset',JSON.stringify(S))}catch(e){}}
 function applyS(){
   var r=document.documentElement.style;r.setProperty('--s',S.size);r.setProperty('--a',S.alpha);
   document.body.classList.toggle('joy',S.style==='joy');document.body.classList.toggle('dpad',S.style!=='joy');
   document.getElementById('szv').textContent=Math.round(S.size*100)+'%';
-  document.getElementById('alv').textContent=Math.round(S.alpha*100)+'%';
+  document.getElementById('alv').textContent=Math.round(S.alpha*100)+'%';document.getElementById('sev').textContent=Math.round(S.sens*100)+'%';
+  document.querySelectorAll('[data-lr2]').forEach(function(b){b.classList.toggle('sel',b.dataset.lr2===S.lr)});
   document.querySelectorAll('[data-st]').forEach(function(b){b.classList.toggle('sel',b.dataset.st===S.style)});
 }
 document.getElementById('gear').addEventListener('click',function(){document.getElementById('panel').classList.add('open')});
 document.getElementById('cls').addEventListener('click',function(){document.getElementById('panel').classList.remove('open')});
-document.getElementById('rst').addEventListener('click',function(){S={style:'dpad',size:1,alpha:1};saveS();applyS();});
+document.getElementById('rst').addEventListener('click',function(){S={style:'dpad',size:1,alpha:1,lr:'strafe',sens:1};saveS();applyS();});
 document.querySelectorAll('[data-st]').forEach(function(b){b.addEventListener('click',function(){S.style=b.dataset.st;saveS();applyS();})});
 document.querySelectorAll('[data-sz]').forEach(function(b){b.addEventListener('click',function(){S.size=Math.min(2,Math.max(.5,Math.round((S.size+.1*b.dataset.sz)*10)/10));saveS();applyS();})});
 document.querySelectorAll('[data-al]').forEach(function(b){b.addEventListener('click',function(){S.alpha=Math.min(1,Math.max(.2,Math.round((S.alpha+.1*b.dataset.al)*10)/10));saveS();applyS();})});
+document.querySelectorAll('[data-lr2]').forEach(function(b){b.addEventListener('click',function(){S.lr=b.dataset.lr2;saveS();applyS();})});
+document.querySelectorAll('[data-se]').forEach(function(b){b.addEventListener('click',function(){S.sens=Math.min(3,Math.max(.4,Math.round((S.sens+.2*b.dataset.se)*10)/10));saveS();applyS();})});
 applyS();
 // joystick: yukarı/aşağı/sol/sağ (çapraz da olur)
-var joy=document.getElementById('joy'),knob=document.getElementById('knob'),jst={173:0,175:0,172:0,174:0},jid=null;
-function jset(k,on){var v=on?1:0;if(jst[k]!==v){jst[k]=v;send(v,k);}}
+var joy=document.getElementById('joy'),knob=document.getElementById('knob'),jst={u:0,d:0,l:0,r:0},jid=null;
+function jset(n,on){var key=n=='u'?173:n=='d'?175:n=='l'?lrk(-1):lrk(1);if(on&&!jst[n]){jst[n]=key;send(1,key);}else if(!on&&jst[n]){send(0,jst[n]);jst[n]=0;}}
 function jmove(e){
   var r=joy.getBoundingClientRect(),R=r.width/2,dx=e.clientX-(r.left+R),dy=e.clientY-(r.top+R),d=Math.hypot(dx,dy),m=Math.min(d,R*.7);
   var kx=d?dx/d*m:0,ky=d?dy/d*m:0,dz=R*.28;
   knob.style.transform='translate(calc(-50% + '+kx+'px),calc(-50% + '+ky+'px))';
-  jset(173,dy<-dz);jset(175,dy>dz);jset(172,dx<-dz);jset(174,dx>dz);
+  jset('u',dy<-dz);jset('d',dy>dz);jset('l',dx<-dz);jset('r',dx>dz);
 }
-function jend(){jid=null;knob.style.transform='translate(-50%,-50%)';jset(173,0);jset(175,0);jset(172,0);jset(174,0);}
+function jend(){jid=null;knob.style.transform='translate(-50%,-50%)';jset('u',0);jset('d',0);jset('l',0);jset('r',0);}
 joy.addEventListener('pointerdown',function(e){e.preventDefault();jid=e.pointerId;joy.setPointerCapture(e.pointerId);jmove(e);});
 joy.addEventListener('pointermove',function(e){if(e.pointerId===jid)jmove(e);});
 joy.addEventListener('pointerup',jend);joy.addEventListener('pointercancel',jend);
+
+// bakış: dokunmatikte ekrana sürükle, PC'de fare (oyuna tıkla = fareyi yakala)
+var cv=document.getElementById('c'),mb=0,lookId=null,lx=0;
+function mouse(dx){if(window.Module&&Module._dg_mouse)Module._dg_mouse(Math.round(dx),mb);}
+cv.addEventListener('pointerdown',function(e){
+  if(e.pointerType==='touch'||e.pointerType==='pen'){
+    if(lookId!==null)return;e.preventDefault();lookId=e.pointerId;lx=e.clientX;try{cv.setPointerCapture(e.pointerId)}catch(_){}
+  }else{
+    if(document.pointerLockElement!==cv){try{cv.requestPointerLock()}catch(_){}return;}
+    e.preventDefault();
+    if(e.button===0){mb|=1;mouse(0);}else if(e.button===2){send(1,162);}
+  }
+});
+cv.addEventListener('pointermove',function(e){
+  if(e.pointerType==='touch'||e.pointerType==='pen'){
+    if(e.pointerId!==lookId)return;var dx=e.clientX-lx;lx=e.clientX;mouse(dx*5*S.sens);
+  }else if(document.pointerLockElement===cv){mouse(e.movementX*3*S.sens);}
+});
+function lend(e){
+  if(e.pointerType==='touch'||e.pointerType==='pen'){if(e.pointerId===lookId)lookId=null;}
+  else{if(e.button===0){mb&=~1;mouse(0);}else if(e.button===2){send(0,162);}}
+}
+cv.addEventListener('pointerup',lend);cv.addEventListener('pointercancel',lend);
+document.addEventListener('pointerlockchange',function(){
+  if(document.pointerLockElement!==cv&&!isTouch){mb=0;mouse(0);send(1,27);setTimeout(function(){send(0,27)},60);} // kilit açılınca Esc = menü
+});
 window.Module={
   canvas:document.getElementById('c'),
   print:function(t){console.log(t)},
@@ -140,5 +171,5 @@ window.Module={
   postRun:[function(){var m=document.getElementById('msg');if(m)m.remove();document.getElementById('c').focus();}]
 };
 </script>
-<script src="doom_web.js?v=4"></script>
+<script src="doom_web5.js?v=5"></script>
 </body></html>
